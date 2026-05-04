@@ -1,4 +1,4 @@
-name: Export Nova Web - VICTORY
+name: Export Nova Web - NUCLEAR
 on:
   workflow_dispatch:
 jobs:
@@ -14,20 +14,23 @@ jobs:
         run: |
           mkdir -p $HOME/.local/share/godot/export_templates/4.2.1.stable
           cp -v /root/.local/share/godot/export_templates/4.2.1.stable/web* $HOME/.local/share/godot/export_templates/4.2.1.stable/
+          ls -la $HOME/.local/share/godot/export_templates/4.2.1.stable/web*
           
-      - name: Export Nova
+      - name: Force Import + Export
         env:
           HOME: /github/home
         run: |
-          godot --headless --editor --path nova --quit
-          mkdir -p nova/build/web
-          godot --headless --verbose --path nova --export-release "web" nova/build/web/index.html
-          echo "=== NOVA SHIPPED ==="
-          ls -la nova/build/web/
-          test -f nova/build/web/index.wasm
-          test -f nova/build/web/index.html
+          cd nova
+          rm -rf .godot/
+          godot --headless --verbose --editor --quit-after 20
+          mkdir -p build/web
+          godot --headless --verbose --export-release "web" build/web/index.html
+          echo "=== NOVA FILES ==="
+          ls -la build/web/
+          test -f build/web/index.wasm
           
       - name: Upload Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Nova-Web-Offline
