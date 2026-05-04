@@ -26,13 +26,13 @@ jobs:
       - name: Import
         run: |
           cd nova
-          godot --headless --display-driver Dummy --verbose --editor --quit
+          godot --headless --display-driver headless --verbose --editor --quit
           
       - name: Export Web
         run: |
           cd nova
           mkdir -p /tmp/web
-          godot --headless --display-driver Dummy --verbose --export-release "web" /tmp/web/index.html
+          godot --headless --display-driver headless --verbose --export-release "web" /tmp/web/index.html
           
       - name: Move Build
         run: |
