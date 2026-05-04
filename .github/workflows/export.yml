@@ -20,9 +20,10 @@ jobs:
       - name: Fix Line Endings + Verify Preset
         run: |
           cd nova
-          dos2unix export_presets.cfg
+          sed -i 's/\r$//' export_presets.cfg
           echo "=== Preset Content ==="
           cat export_presets.cfg
+          echo "=== Checking export_path ==="
           grep "export_path=" export_presets.cfg
           
       - name: Import Project
