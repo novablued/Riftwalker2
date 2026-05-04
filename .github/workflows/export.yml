@@ -13,8 +13,10 @@ jobs:
           mkdir -v -p ~/.local/share/godot/export_templates
           mv /root/.local/share/godot/export_templates/4.3.stable ~/.local/share/godot/export_templates/4.3.stable
           
-      - name: Fix Line Endings + Clean Cache
+      - name: Nuke Editor Settings + Fix Files
         run: |
+          rm -rf ~/.config/godot
+          rm -rf ~/.local/share/godot/editor_settings*
           apt-get update && apt-get install -y dos2unix
           find nova -type f \( -name "*.cfg" -o -name "*.godot" -o -name "*.tscn" -o -name "*.tres" -o -name "*.gd" \) -exec dos2unix {} \;
           rm -rf nova/.godot
@@ -24,13 +26,13 @@ jobs:
       - name: Import
         run: |
           cd nova
-          godot --headless --no-window --verbose --editor --quit
+          godot --headless --display-driver Dummy --verbose --editor --quit
           
       - name: Export Web
         run: |
           cd nova
           mkdir -p /tmp/web
-          godot --headless --no-window --verbose --export-release "web" /tmp/web/index.html
+          godot --headless --display-driver Dummy --verbose --export-release "web" /tmp/web/index.html
           
       - name: Move Build
         run: |
