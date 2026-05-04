@@ -1,45 +1,32 @@
 name: Export Nova Web
 on: workflow_dispatch
 jobs:
-  export-web:
+  export:
     runs-on: ubuntu-latest
-    env:
-      GODOT_DISABLE_CRASH_HANDLER: 1
-      DISPLAY: ":99"
-    defaults:
-      run:
-        working-directory: nova
+    container:
+      image: barichello/godot-ci:4.3
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Godot
-        uses: chickensoft-games/setup-godot@v2
-        with:
-          version: 4.3.0
-          include-templates: true
-          use-dotnet: false
-      
-      - name: Install display server
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-      
-      - name: Nuke all cache
-        run: |
-          rm -rf .godot
-          rm -rf .import
-          find . -name "*.import" -delete
-          
-      - name: Import project
-        run: godot --headless --display-driver headless --editor --quit-after 5
+      - name: Checkout
+        uses: actions/checkout@v4
         
-      - name: Export Web
+      - name: Setup
         run: |
-          mkdir -p build/web
-          godot --headless --display-driver headless --export-release Web build/web/index.html
+          mkdir -v -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/export_templates/4.3.stable ~/.local/share/godot/export_templates/4.3.stable
           
-      - uses: actions/upload-artifact@v4
+      - name: Import
+        run: |
+          cd nova
+          godot --headless --verbose --editor --quit
+          
+      - name: Export
+        run: |
+          cd nova
+          mkdir -p build/web
+          godot --headless --verbose --export-release "Web" build/web/index.html
+          
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
           name: Godot Web Export
           path: nova/build/web
