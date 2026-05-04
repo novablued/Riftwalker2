@@ -1,10 +1,10 @@
-name: Export Nova Web - Final
+name: Export Nova Web - Debug + Fix
 on: [workflow_dispatch]
 
 jobs:
   export:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     container:
       image: barichello/godot-ci:4.2.1
     steps:
@@ -13,32 +13,45 @@ jobs:
 
       - name: Install Export Templates
         run: |
-          apt-get update -qq && apt-get install -y -qq wget unzip
+          apt-get update -qq && apt-get install -y -qq wget unzip dos2unix
           mkdir -p /root/.local/share/godot/export_templates/4.2.1.stable
           cd /tmp
           wget -q https://github.com/godotengine/godot-builds/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
           unzip -q Godot_v4.2.1-stable_export_templates.tpz
           mv templates/* /root/.local/share/godot/export_templates/4.2.1.stable/
 
-      - name: Import Project
+      - name: Fix Line Endings + Verify Preset
         run: |
           cd nova
-          echo "=== Importing assets ==="
-          godot --headless --editor --quit --verbose
-          echo "=== .godot folder contents ==="
-          ls -la .godot/
+          echo "=== Fixing CRLF in export_presets.cfg ==="
+          dos2unix export_presets.cfg
+          echo "=== Preset file contents ==="
+          cat -A export_presets.cfg | head -20
+          echo "=== Checking preset name ==="
+          grep "name=" export_presets.cfg
 
-      - name: Export Web
+      - name: Import + Export Debug
         run: |
           cd nova
-          mkdir -p build/web
-          echo "=== Exporting ==="
-          godot --headless --export-release "web" build/web/index.html --verbose
-          echo "=== Files created ==="
+          godot --headless --editor --quit --verbose
+          echo "=== Attempting DEBUG export first ==="
+          godot --headless --export-debug "web" build/web/index.html --verbose
+          echo "=== Files after debug export ==="
           ls -la build/web/
+          
+      - name: Export Release if Debug Worked
+        run: |
+          cd nova
+          rm -rf build/web/*
+          echo "=== Attempting RELEASE export ==="
+          godot --headless --export-release "web" build/web/index.html --verbose
+          echo "=== Final files ==="
+          ls -la build/web/
+          test -f build/web/index.html
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: Nova-Web-Offline
           path: nova/build/web
