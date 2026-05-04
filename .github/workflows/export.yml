@@ -1,4 +1,4 @@
-name: Export Nova Web - Bulletproof
+name: Export Nova Web - Actually Works
 on: [workflow_dispatch]
 
 jobs:
@@ -13,37 +13,22 @@ jobs:
 
       - name: Install Export Templates
         run: |
-          echo "=== Installing Web Export Templates ==="
-          apt-get update -qq
-          apt-get install -y -qq wget unzip
+          apt-get update -qq && apt-get install -y -qq wget unzip
           mkdir -p /root/.local/share/godot/export_templates/4.2.1.stable
           cd /tmp
           wget -q https://github.com/godotengine/godot-builds/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
           unzip -q Godot_v4.2.1-stable_export_templates.tpz
           mv templates/* /root/.local/share/godot/export_templates/4.2.1.stable/
-          echo "Templates installed:"
-          ls /root/.local/share/godot/export_templates/4.2.1.stable/
 
-      - name: Verify Main Scene
+      - name: Export Web
         run: |
-          echo "=== Checking project.godot for main scene ==="
-          cat nova/project.godot | grep "run/main_scene"
-
-      - name: Import Project
-        run: |
-          echo "=== Importing project ==="
-          mkdir -p nova/.godot
-          godot --headless --path nova --editor --quit --verbose
-
-      - name: Export Web Release
-        run: |
-          echo "=== Exporting Web Build ==="
-          mkdir -p nova/build/web
-          godot --headless --path nova --export-release "web" build/web/index.html --verbose
-          echo "=== Export finished. Files created: ==="
-          ls -la nova/build/web/
-          echo "=== File sizes: ==="
-          du -sh nova/build/web/*
+          cd nova
+          mkdir -p build/web
+          echo "=== Current dir: $(pwd) ==="
+          godot --headless --export-release "web" build/web/index.html --verbose
+          echo "=== Files actually created: ==="
+          ls -la build/web/
+          test -f build/web/index.html || exit 1
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
