@@ -1,4 +1,4 @@
-name: Export Nova Web - Debug + Fix
+name: Export Nova Web - Fixed
 on: [workflow_dispatch]
 
 jobs:
@@ -23,27 +23,32 @@ jobs:
       - name: Fix Line Endings + Verify Preset
         run: |
           cd nova
-          echo "=== Fixing CRLF in export_presets.cfg ==="
           dos2unix export_presets.cfg
-          echo "=== Preset file contents ==="
-          cat -A export_presets.cfg | head -20
-          echo "=== Checking preset name ==="
+          echo "=== Preset name check ==="
           grep "name=" export_presets.cfg
+          echo "=== Preset platform check ==="
+          grep "platform=" export_presets.cfg
 
-      - name: Import + Export Debug
+      - name: Import Project
         run: |
           cd nova
           godot --headless --editor --quit --verbose
-          echo "=== Attempting DEBUG export first ==="
+
+      - name: Export Debug
+        run: |
+          cd nova
+          mkdir -p build/web
+          echo "=== DEBUG EXPORT START ==="
           godot --headless --export-debug "web" build/web/index.html --verbose
-          echo "=== Files after debug export ==="
+          echo "=== Files after debug ==="
           ls -la build/web/
-          
-      - name: Export Release if Debug Worked
+
+      - name: Export Release
         run: |
           cd nova
           rm -rf build/web/*
-          echo "=== Attempting RELEASE export ==="
+          mkdir -p build/web
+          echo "=== RELEASE EXPORT START ==="
           godot --headless --export-release "web" build/web/index.html --verbose
           echo "=== Final files ==="
           ls -la build/web/
