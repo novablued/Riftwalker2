@@ -35,16 +35,14 @@ jobs:
         run: |
           cd nova
           mkdir -p build/web
-          godot --headless --verbose --export-debug "web" build/web/index.html
+          godot --headless --verbose --export-debug "web"
           echo "=== Files after debug ==="
           ls -la build/web/
           
       - name: Export Release
         run: |
           cd nova
-          rm -rf build/web/*
-          mkdir -p build/web
-          godot --headless --verbose --export-release "web" build/web/index.html
+          godot --headless --verbose --export-release "web"
           echo "=== Final files ==="
           ls -la build/web/
           test -f build/web/index.html
