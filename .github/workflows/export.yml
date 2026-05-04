@@ -3,29 +3,42 @@ on: workflow_dispatch
 jobs:
   export-web:
     runs-on: ubuntu-latest
+    env:
+      GODOT_DISABLE_CRASH_HANDLER: 1
+      DISPLAY: ":99"
     defaults:
       run:
         working-directory: nova
     steps:
       - uses: actions/checkout@v4
-      - uses: chickensoft-games/setup-godot@v2
+      
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
         with:
           version: 4.3.0
           include-templates: true
           use-dotnet: false
       
-      - name: Clean cache
-        run: rm -rf .godot
-        
-      - name: Import project assets
-        run: godot --headless --audio-driver Dummy --import --quit --quit-after 1
-        
-      - name: Build directories  
-        run: mkdir -p build/web
+      - name: Install display server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+      
+      - name: Nuke all cache
+        run: |
+          rm -rf .godot
+          rm -rf .import
+          find . -name "*.import" -delete
+          
+      - name: Import project
+        run: godot --headless --display-driver headless --editor --quit-after 5
         
       - name: Export Web
-        run: godot --headless --audio-driver Dummy --export-release Web build/web/index.html
-        
+        run: |
+          mkdir -p build/web
+          godot --headless --display-driver headless --export-release Web build/web/index.html
+          
       - uses: actions/upload-artifact@v4
         with:
           name: Godot Web Export
