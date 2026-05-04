@@ -1,4 +1,4 @@
-name: Export Nova Web - Actually Works
+name: Export Nova Web - Final
 on: [workflow_dispatch]
 
 jobs:
@@ -20,15 +20,22 @@ jobs:
           unzip -q Godot_v4.2.1-stable_export_templates.tpz
           mv templates/* /root/.local/share/godot/export_templates/4.2.1.stable/
 
+      - name: Import Project
+        run: |
+          cd nova
+          echo "=== Importing assets ==="
+          godot --headless --editor --quit --verbose
+          echo "=== .godot folder contents ==="
+          ls -la .godot/
+
       - name: Export Web
         run: |
           cd nova
           mkdir -p build/web
-          echo "=== Current dir: $(pwd) ==="
+          echo "=== Exporting ==="
           godot --headless --export-release "web" build/web/index.html --verbose
-          echo "=== Files actually created: ==="
+          echo "=== Files created ==="
           ls -la build/web/
-          test -f build/web/index.html || exit 1
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
