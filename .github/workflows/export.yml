@@ -7,6 +7,7 @@ jobs:
     container: barichello/godot-ci:4.2.1
     steps:
       - uses: actions/checkout@v4
+      
       - name: Copy Templates to Github User
         run: |
           echo "=== COPYING TEMPLATES ==="
@@ -14,6 +15,7 @@ jobs:
           cp -r /root/.local/share/godot/export_templates/4.2.1.stable /github/home/.local/share/godot/export_templates/
           echo "=== TEMPLATES COPIED ==="
           ls -la /github/home/.local/share/godot/export_templates/4.2.1.stable/
+          
       - name: Import + Export Nova
         run: |
           cd nova
@@ -24,6 +26,7 @@ jobs:
           echo "=== EXPORTED FILES ==="
           ls -la build/web/
           test -f build/web/index.html
+          
       - name: Upload Artifact
         if: always()
         uses: actions/upload-artifact@v4
