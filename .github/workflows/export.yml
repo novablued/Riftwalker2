@@ -1,35 +1,56 @@
-[preset.0]
+name: Export Nova Web - Fixed
 
-name="web"
-platform="Web"
-runnable=true
-custom_features=""
-export_filter="all_resources"
-include_filter=""
-exclude_filter=""
-export_path=""
-script_export_mode=1
-script_encryption_key=""
+on:
+  workflow_dispatch:
 
-[preset.0.options]
-
-custom_template/debug=""
-custom_template/release=""
-variant/extensions_support=false
-vram_texture_compression/for_desktop=true
-vram_texture_compression/for_mobile=false
-html/export_icon=true
-html/head_include=""
-html/canvas_resize_policy=2
-html/experimental_virtual_keyboard=false
-html/focus_canvas_on_start=true
-html/include_service_worker=true
-html/use_pthread_hint=true
-progressive_web_app/enabled=true
-progressive_web_app/offline_page=""
-progressive_web_app/display=1
-progressive_web_app/orientation=0
-progressive_web_app/icon_144x144=""
-progressive_web_app/icon_180x180=""
-progressive_web_app/icon_512x512=""
-progressive_web_app/background_color=Color(0, 0, 0, 1)
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    container: barichello/godot-ci:4.2.1
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Templates
+        run: |
+          mkdir -p /root/.local/share/godot/export_templates/4.2.1.stable
+          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
+          unzip -q Godot_v4.2.1-stable_export_templates.tpz
+          mv templates/* /root/.local/share/godot/export_templates/4.2.1.stable/
+          
+      - name: Fix Line Endings + Verify Preset
+        run: |
+          cd nova
+          dos2unix export_presets.cfg
+          echo "=== Preset Content ==="
+          cat export_presets.cfg
+          grep "export_path=" export_presets.cfg
+          
+      - name: Import Project
+        run: |
+          cd nova
+          godot --headless --editor --quit
+          
+      - name: Export Debug
+        run: |
+          cd nova
+          mkdir -p build/web
+          godot --headless --verbose --export-debug "web" build/web/index.html
+          echo "=== Files after debug ==="
+          ls -la build/web/
+          
+      - name: Export Release
+        run: |
+          cd nova
+          rm -rf build/web/*
+          mkdir -p build/web
+          godot --headless --verbose --export-release "web" build/web/index.html
+          echo "=== Final files ==="
+          ls -la build/web/
+          test -f build/web/index.html
+          
+      - name: Upload Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nova-Web-Offline
+          path: nova/build/web
