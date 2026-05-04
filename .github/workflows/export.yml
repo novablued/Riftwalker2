@@ -16,7 +16,7 @@ jobs:
       - name: Fix Line Endings + Clean Cache
         run: |
           apt-get update && apt-get install -y dos2unix
-          find nova -type f \( -name "*.cfg" -o -name "*.godot" -o -name "*.tscn" -o -name "*.tres" \) -exec dos2unix {} \;
+          find nova -type f \( -name "*.cfg" -o -name "*.godot" -o -name "*.tscn" -o -name "*.tres" -o -name "*.gd" \) -exec dos2unix {} \;
           rm -rf nova/.godot
           rm -rf nova/.import
           find nova -name "*.import" -delete
@@ -24,13 +24,13 @@ jobs:
       - name: Import
         run: |
           cd nova
-          godot --headless --verbose --editor --quit
+          godot --headless --no-window --verbose --editor --quit
           
       - name: Export Web
         run: |
           cd nova
           mkdir -p /tmp/web
-          godot --headless --verbose --export-release "Web" /tmp/web/index.html
+          godot --headless --no-window --verbose --export-release "web" /tmp/web/index.html
           
       - name: Move Build
         run: |
