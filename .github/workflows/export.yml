@@ -1,33 +1,53 @@
-name: Export Nova Web
+name: Export Nova Web - Bulletproof
 on: [workflow_dispatch]
 
 jobs:
   export:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     container:
       image: barichello/godot-ci:4.2.1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Show export_presets.cfg
-        run: cat nova/export_presets.cfg
-
-      - name: Import
+      - name: Install Export Templates
         run: |
+          echo "=== Installing Web Export Templates ==="
+          apt-get update -qq
+          apt-get install -y -qq wget unzip
+          mkdir -p /root/.local/share/godot/export_templates/4.2.1.stable
+          cd /tmp
+          wget -q https://github.com/godotengine/godot-builds/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
+          unzip -q Godot_v4.2.1-stable_export_templates.tpz
+          mv templates/* /root/.local/share/godot/export_templates/4.2.1.stable/
+          echo "Templates installed:"
+          ls /root/.local/share/godot/export_templates/4.2.1.stable/
+
+      - name: Verify Main Scene
+        run: |
+          echo "=== Checking project.godot for main scene ==="
+          cat nova/project.godot | grep "run/main_scene"
+
+      - name: Import Project
+        run: |
+          echo "=== Importing project ==="
           mkdir -p nova/.godot
-          godot --headless --path nova --editor --quit
+          godot --headless --path nova --editor --quit --verbose
 
-      - name: Export Web
+      - name: Export Web Release
         run: |
+          echo "=== Exporting Web Build ==="
           mkdir -p nova/build/web
-          godot --headless --path nova --export-release "web" build/web/index.html
-
-      - name: List files
-        run: ls -la nova/build/web
+          godot --headless --path nova --export-release "web" build/web/index.html --verbose
+          echo "=== Export finished. Files created: ==="
+          ls -la nova/build/web/
+          echo "=== File sizes: ==="
+          du -sh nova/build/web/*
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Godot Web Export
+          name: Nova-Web-Offline
           path: nova/build/web
+          retention-days: 1
