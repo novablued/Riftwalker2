@@ -8,11 +8,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Debug - Check Where Templates Live
+        run: |
+          echo "=== CHECKING /root/ TEMPLATES ==="
+          ls -la /root/.local/share/godot/export_templates/4.2.1.stable/ || echo "NO TEMPLATES IN /root/"
+          echo "=== CHECKING /github/home/ TEMPLATES ==="
+          ls -la /github/home/.local/share/godot/export_templates/4.2.1.stable/ || echo "NO TEMPLATES IN /github/home/"
+      
       - name: Copy Templates to Github User
         run: |
           echo "=== COPYING TEMPLATES ==="
           mkdir -p /github/home/.local/share/godot/export_templates
-          cp -r /root/.local/share/godot/export_templates/4.2.1.stable /github/home/.local/share/godot/export_templates/
+          cp -rv /root/.local/share/godot/export_templates/4.2.1.stable /github/home/.local/share/godot/export_templates/ || echo "COPY FAILED"
           echo "=== TEMPLATES COPIED ==="
           ls -la /github/home/.local/share/godot/export_templates/4.2.1.stable/
           
@@ -25,7 +32,7 @@ jobs:
           godot --headless --verbose --export-release "web" build/web/index.html
           echo "=== EXPORTED FILES ==="
           ls -la build/web/
-          test -f build/web/index.html
+          test -f build/web/index.html || exit 1
           
       - name: Upload Artifact
         if: always()
