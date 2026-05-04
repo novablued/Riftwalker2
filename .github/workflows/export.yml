@@ -1,4 +1,4 @@
-name: Export Nova Web - Test
+name: Export Nova - Find Broken File
 
 on:
   workflow_dispatch:
@@ -9,43 +9,28 @@ jobs:
     container: barichello/godot-ci:4.2.1
     steps:
       - uses: actions/checkout@v4
-
-      - name: Create Minimal Project
-        run: |
-          mkdir -p test_project
-          echo '[application]' > test_project/project.godot
-          echo 'config/name="Test"' >> test_project/project.godot
-          echo 'run/main_scene=""' >> test_project/project.godot
-          echo 'config/features=PackedStringArray("4.2")' >> test_project/project.godot
-
-      - name: Create Minimal Preset
-        run: |
-          cd test_project
-          echo '[preset.0]' > export_presets.cfg
-          echo 'name="web"' >> export_presets.cfg
-          echo 'platform="Web"' >> export_presets.cfg
-          echo 'runnable=true' >> export_presets.cfg
-          echo 'enabled=true' >> export_presets.cfg
-          echo 'export_path="build/index.html"' >> export_presets.cfg
-
+      
       - name: Install Templates
         run: |
           mkdir -p /root/.local/share/godot/export_templates/4.2.1.stable
           wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
           unzip -q Godot_v4.2.1-stable_export_templates.tpz
           mv templates/* /root/.local/share/godot/export_templates/4.2.1.stable/
-
-      - name: Export Test Project
+          
+      - name: Import Project + Show Errors
         run: |
-          cd test_project
-          mkdir -p build
-          godot --headless --verbose --export-release "web" build/index.html
-          echo "=== Files ==="
-          ls -la build/
-
-      - name: Upload Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Test-Export
-          path: test_project/build
+          cd nova
+          sed -i 's/\r$//' export_presets.cfg
+          echo "=== STARTING IMPORT - ERRORS WILL SHOW BELOW ==="
+          godot --headless --verbose --editor --quit || true
+          echo "=== IMPORT DONE ==="
+          
+      - name: Try Export + Capture Error
+        run: |
+          cd nova
+          mkdir -p build/web
+          echo "=== STARTING EXPORT - REAL ERROR BELOW ==="
+          godot --headless --verbose --export-debug "web" build/web/index.html || true
+          echo "=== EXPORT ATTEMPT DONE ==="
+          echo "=== FILES CREATED ==="
+          ls -la build/web/ || echo "No files"
