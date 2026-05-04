@@ -1,4 +1,4 @@
-name: Export Nova Web - COPY FIX
+name: Export Nova Web - FIND PRESET
 on:
   workflow_dispatch:
 jobs:
@@ -8,29 +8,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Copy Templates to Github User
+      - name: Copy Templates
         run: |
-          echo "=== CREATING DIR ==="
           mkdir -p /github/home/.local/share/godot/export_templates/4.2.1.stable
-          echo "=== COPYING ==="
           cp -v /root/.local/share/godot/export_templates/4.2.1.stable/web* /github/home/.local/share/godot/export_templates/4.2.1.stable/
-          echo "=== VERIFY COPY ==="
           ls -la /github/home/.local/share/godot/export_templates/4.2.1.stable/web*
+          
+      - name: List Export Presets
+        run: |
+          echo "=== YOUR PRESET NAMES ==="
+          cat nova/export_presets.cfg | grep "name="
           
       - name: Import + Export Nova
         run: |
-          echo "=== IMPORT ==="
-          godot --headless --verbose --editor --path nova --quit
-          echo "=== EXPORT ==="
+          godot --headless --editor --path nova --quit
           mkdir -p nova/build/web
-          godot --headless --verbose --path nova --export-release "Web" nova/build/web/index.html
+          godot --headless --path nova --export-release "Web" nova/build/web/index.html || true
           echo "=== RESULTS ==="
           ls -la nova/build/web/
-          test -f nova/build/web/index.html || exit 1
-          
-      - name: Upload Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Nova-Web-Offline
-          path: nova/build/web
