@@ -1,4 +1,4 @@
-name: Export Nova Web - FINAL BOSS
+name: Export Nova Web - VICTORY
 on:
   workflow_dispatch:
 jobs:
@@ -9,36 +9,25 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Setup Templates + Env
-        run: |
-          export HOME=/github/home
-          mkdir -p $HOME/.local/share/godot/export_templates/4.2.1.stable
-          cp -v /root/.local/share/godot/export_templates/4.2.1.stable/web* $HOME/.local/share/godot/export_templates/4.2.1.stable/
-          echo "=== TEMPLATES ==="
-          ls -la $HOME/.local/share/godot/export_templates/4.2.1.stable/web*
-          
-      - name: Show Export Preset Config
-        run: |
-          echo "=== YOUR export_presets.cfg ==="
-          cat nova/export_presets.cfg
-          
-      - name: Import Project
         env:
           HOME: /github/home
         run: |
-          godot --headless --verbose --editor --path nova --quit
+          mkdir -p $HOME/.local/share/godot/export_templates/4.2.1.stable
+          cp -v /root/.local/share/godot/export_templates/4.2.1.stable/web* $HOME/.local/share/godot/export_templates/4.2.1.stable/
           
       - name: Export Nova
         env:
           HOME: /github/home
         run: |
+          godot --headless --editor --path nova --quit
           mkdir -p nova/build/web
           godot --headless --verbose --path nova --export-release "web" nova/build/web/index.html
-          echo "=== EXPORTED FILES ==="
+          echo "=== NOVA SHIPPED ==="
           ls -la nova/build/web/
           test -f nova/build/web/index.wasm
+          test -f nova/build/web/index.html
           
       - name: Upload Artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Nova-Web-Offline
