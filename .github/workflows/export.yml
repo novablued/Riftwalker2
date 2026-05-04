@@ -1,36 +1,32 @@
-name: Export Nova - Find Broken File
-
+name: Export Nova Web - FINAL
 on:
   workflow_dispatch:
-
 jobs:
   export:
     runs-on: ubuntu-latest
     container: barichello/godot-ci:4.2.1
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Install Templates
+      - name: Copy Templates to Github User
         run: |
-          mkdir -p /root/.local/share/godot/export_templates/4.2.1.stable
-          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
-          unzip -q Godot_v4.2.1-stable_export_templates.tpz
-          mv templates/* /root/.local/share/godot/export_templates/4.2.1.stable/
-          
-      - name: Import Project + Show Errors
+          echo "=== COPYING TEMPLATES ==="
+          mkdir -p /github/home/.local/share/godot/export_templates
+          cp -r /root/.local/share/godot/export_templates/4.2.1.stable /github/home/.local/share/godot/export_templates/
+          echo "=== TEMPLATES COPIED ==="
+          ls -la /github/home/.local/share/godot/export_templates/4.2.1.stable/
+      - name: Import + Export Nova
         run: |
           cd nova
           sed -i 's/\r$//' export_presets.cfg
-          echo "=== STARTING IMPORT - ERRORS WILL SHOW BELOW ==="
-          godot --headless --verbose --editor --quit || true
-          echo "=== IMPORT DONE ==="
-          
-      - name: Try Export + Capture Error
-        run: |
-          cd nova
+          godot --headless --verbose --editor --quit
           mkdir -p build/web
-          echo "=== STARTING EXPORT - REAL ERROR BELOW ==="
-          godot --headless --verbose --export-debug "web" build/web/index.html || true
-          echo "=== EXPORT ATTEMPT DONE ==="
-          echo "=== FILES CREATED ==="
-          ls -la build/web/ || echo "No files"
+          godot --headless --verbose --export-release "web" build/web/index.html
+          echo "=== EXPORTED FILES ==="
+          ls -la build/web/
+          test -f build/web/index.html
+      - name: Upload Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nova-Web-Offline
+          path: nova/build/web
