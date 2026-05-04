@@ -31,6 +31,11 @@ jobs:
           cd nova
           godot --headless --editor --quit
           
+      - name: List Available Presets
+        run: |
+          cd nova
+          godot --headless --export-presets
+          
       - name: Export Debug
         run: |
           cd nova
