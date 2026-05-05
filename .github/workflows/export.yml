@@ -1,37 +1,18 @@
-name: Export Nova Web - NUCLEAR
-on:
-  workflow_dispatch:
+cat > .github/workflows/export.yml << 'EOF'
+name: Build Android APK
+on: workflow_dispatch
 jobs:
-  export:
+  build:
     runs-on: ubuntu-latest
-    container: barichello/godot-ci:4.2.1
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Templates + Env
-        env:
-          HOME: /github/home
-        run: |
-          mkdir -p $HOME/.local/share/godot/export_templates/4.2.1.stable
-          cp -v /root/.local/share/godot/export_templates/4.2.1.stable/web* $HOME/.local/share/godot/export_templates/4.2.1.stable/
-          ls -la $HOME/.local/share/godot/export_templates/4.2.1.stable/web*
-          
-      - name: Force Import + Export
-        env:
-          HOME: /github/home
-        run: |
-          cd nova
-          rm -rf .godot/
-          godot --headless --verbose --editor --quit-after 20
-          mkdir -p build/web
-          godot --headless --verbose --export-release "web" build/web/index.html
-          echo "=== NOVA FILES ==="
-          ls -la build/web/
-          test -f build/web/index.wasm
-          
-      - name: Upload Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Build Android
+        uses: firebelley/godot-export@v6
         with:
-          name: Nova-Web-Offline
-          path: nova/build/web
+          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.2.2/Godot_v4.2.2-stable_linux.x86_64.zip
+          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.2.2/Godot_v4.2.2-stable_export_templates.tpz
+          relative_project_path: ./nova
+          archive_output: true
+EOF
+
+git add .github/workflows/export.yml && git commit -m "Switch to Android APK build" && git push
