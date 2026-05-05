@@ -6,9 +6,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Android
-        uses: firebelley/godot-export@v6
+        uses: firebelley/godot-export@v7.0.0
         with:
           godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/4.2.2/Godot_v4.2.2-stable_linux.x86_64.zip
           godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/4.2.2/Godot_v4.2.2-stable_export_templates.tpz
-          relative_project_path: ./nova
+          relative_project_path:./nova
           archive_output: true
+【5683756616505535617†L43-L44】
