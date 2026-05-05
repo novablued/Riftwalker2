@@ -23,4 +23,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: riftwalker-android
-          path: nova/builds/*.apk
+          path: nova/*.apk
