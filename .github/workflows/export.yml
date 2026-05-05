@@ -13,14 +13,14 @@ jobs:
       - name: Export Android APK
         uses: firebelley/godot-export@v6.0.0
         with:
-          godot-version: 4.2.1
-          project-path: nova
-          export-presets-path: nova/export_presets.cfg
-          export-name: riftwalker
-          relative-project-path: nova
+          godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_linux.x86_64.zip
+          godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
+          relative_project_path: nova
+          presets_to_export: Android
+          archive_output: true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: riftwalker-android
-          path: nova/builds/riftwalker.apk
+          path: nova/builds/*.apk
