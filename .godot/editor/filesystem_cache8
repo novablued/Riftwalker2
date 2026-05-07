@@ -1,0 +1,12 @@
+ea4bc82a6ad023ab7ee23ee620429895
+::res://::1778096866
+export.log::TextFile::-1::1777963121::0::1::::<><>::
+export_presets.cfg::TextFile::-1::1778090132::0::1::::<><>::
+README.md::TextFile::-1::1777868063::0::1::::<><>::
+::res://export/::1778084662
+::res://nova/::1778081434
+::res://nova/export/::1778081302
+::res://nova/scenes/::1778080565
+SystemWindow.tscn::PackedScene::1314071317177845414::1778080565::0::1::::<><>::
+::res://nova/scripts/::1778066831
+player_controller.gd::GDScript::-1::1778066831::0::1::::NovaVoss<>CharacterBody3D<>::

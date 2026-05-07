@@ -1,0 +1,13 @@
+[application]
+config/name="Riftwalker: False Prophet"
+config/version="0.1"
+run/main_scene="res://scenes/NovaVoss.tscn"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+quality/driver_name="GLES2"
+window/size/viewport_width=480
+window/size/viewport_height=272
+window/size/resizable=false
+window/stretch/mode="viewport"
+window/stretch/aspect="keep"

@@ -1,0 +1,79 @@
+[gd_scene load_steps=3 format=3 uid="uid://systemwindow"]
+
+[sub_resource type="GDScript" id="GDScript_system"]
+script/source = "extends CanvasLayer
+class_name SystemWindow
+
+@onready var hp_bar: ProgressBar = $HBoxContainer/HPBar
+@onready var link_timer: Label = $HBoxContainer/LinkTimer  
+@onready var revenant_count: Label = $HBoxContainer/RevenantCount
+
+var nova_hp: float = 100.0
+var max_hp: float = 100.0
+var link_time: float = 0.0
+var revenants: int = 0
+
+func _ready():
+hp_bar.max_value = max_hp
+hp_bar.value = nova_hp
+update_ui()
+
+func _process(delta):
+if link_time > 0:
+k_time -= delta
+k_timer.text = \"LINK: %.1fs\" % link_time
+else:
+k_timer.text = \"LINK: READY\"
+update_ui()
+
+func update_ui():
+hp_bar.value = nova_hp
+revenant_count.text = \"REVENANTS: %d/3\" % revenants
+
+func take_damage(amount: float):
+nova_hp -= amount
+if nova_hp < 0:
+ova_hp = 0
+update_ui()
+
+func activate_link(burst_time: float = 15.0):
+link_time = burst_time
+
+func add_revenant():
+if revenants < 3:
+ants += 1
+ode name="SystemWindow" type="CanvasLayer"]
+layer = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+anchor_left = 0.05
+anchor_top = 0.05
+anchor_right = 0.95
+anchor_bottom = 0.15
+offset_left = 0
+offset_top = 0
+offset_right = 0
+offset_bottom = 0
+alignment = 1
+
+[node name="HPBar" type="ProgressBar" parent="HBoxContainer"]
+custom_minimum_size = Vector2(200, 24)
+theme_override_styles/fill = SubResource("StyleBoxFlat_1")
+theme_override_styles/background = SubResource("StyleBoxFlat_2")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+bg_color = Color(0.8, 0.1, 0.1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+
+[node name="LinkTimer" type="Label" parent="HBoxContainer"]
+text = "LINK: READY"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.2, 0.8, 1, 1)
+
+[node name="RevenantCount" type="Label" parent="HBoxContainer"]
+text = "REVENANTS: 0/3"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.8, 0.8, 0.2, 1)
