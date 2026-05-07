@@ -1,5 +1,4 @@
 extends Node
-extends Node3D
 
 var revenants = []
 const MAX_REVENANTS = 3
